@@ -16,7 +16,6 @@
 #include <algorithm>
 using namespace std;
 
-
 // a structure to represent a weighted edge in graph
 struct edgeConnection
 {
@@ -24,7 +23,6 @@ struct edgeConnection
     int cityPairDest;
     int weight;
 };
-
 
 //main graph structure to form weighted, undirected city-pairs graph
 struct cityGraph
@@ -34,7 +32,6 @@ struct cityGraph
     struct edgeConnection * connection;       //edge struct to formulate array of edges within graph
 };
 
-
 // A structure to represent a subset for union-find
 struct subset
 {
@@ -42,11 +39,9 @@ struct subset
     int rank;
 };
 
-
 //global int parameters for cityGraph
 int graphEdges;
 int graphVerticies;
-
 
 //function declarations
 void kruskalsAlg(struct cityGraph * graph, string * array);
@@ -57,17 +52,14 @@ bool edgeExists(struct cityGraph * graph, string city, string dest, string * arr
 int map(string city, string * array);
 void display (edgeConnection result[], int resultIndex, string * array);
 
-
-
 //HELPER FUNCTIONS
-
 
 //allocate the graph with given parameters and return it
 struct cityGraph * allocateGraph(int vertices, int edges)
 {
     struct cityGraph * graph = new cityGraph;                   //allocate a new graph
-    graph -> vertices = vertices;                               //fill with # verticies needed
     graph -> edges = edges;                                     //fill with #edges needed
+    graph -> vertices = vertices;                               //fill with # verticies needed
     graph -> connection = new edgeConnection[edges];            //allocate array of edge connections
 
     return graph;
@@ -82,34 +74,32 @@ int comparatorFunc(const void * a, const void * b)
 //    cout << "\nA val " << edgeA -> weight << endl;
 //    cout << "B val " << edgeB -> weight << endl;
 
-    if (edgeA -> weight < edgeB -> weight)
+    if (edgeA -> weight < edgeB -> weight)          //if edgeA should go before edgeB
         return -1;
 
-    if (edgeA -> weight == edgeB -> weight)
+    if (edgeA -> weight == edgeB -> weight)          //if edgeA and edgeB are equal
         return 0;
 
-    if (edgeA -> weight > edgeB -> weight)
+    if (edgeA -> weight > edgeB -> weight)          //if edgeA should go after edgeB
         return 1;
 
 }
 
-
+//checks if edge already exists inside cityGraph, used when populating graph to make sure we do not add two of the same edges to the undirecte graph
 bool edgeExists(struct cityGraph * graph, string city, string dest, string * array)
 {
-
     for (int i = 0; i < graphEdges ; i++)
     {
+        //if we have the same edge but with the city and dest just flipped, return true that the edge exists
         if (graph -> connection[i].cityPairSource == map(dest, array) && graph -> connection[i].cityPairDest == map(city, array)) {
             return true;
         }
     }
-
     return false;
 
 }
 
-
-//map anarray index to a city so we can use ints in kruskals algorithm
+//map an array index to a city so we can use ints in kruskals algorithm to traverse
 int map(string city, string array[])
 {
     for (int f = 0; f <= graphVerticies + 1; f++) {
@@ -119,17 +109,17 @@ int map(string city, string array[])
 
 }
 
-
 //recursive function that traverses throguh until we find the location index fo the given city
-int find(struct subset subsets[], int i)
+int find(struct subset vSubset[], int index)
 {
     // find root and make root as parent of i
-    if (subsets[i].parent != i)
-        subsets[i].parent = find(subsets, subsets[i].parent);       //if not found, recurse again
+    if (vSubset[index].parent != index)
+    {
+        vSubset[index].parent = find(vSubset, vSubset[index].parent);       //if not found, recurse again
+    }
 
-    return subsets[i].parent;                                       //if foud retrun
+    return vSubset[index].parent;                                       //if found retrun
 }
-
 
 void display (edgeConnection result[], int resultIndex, string * array)
 {
@@ -145,6 +135,5 @@ void display (edgeConnection result[], int resultIndex, string * array)
 
     cout << "\nTotal Weight: " << totalWeight << endl;
 }
-
 
 #endif //UNTITLED2_KRUSKALS_H

@@ -7,7 +7,8 @@
 #include <algorithm>
 
 //main sets graph parameters, creates cityGraph, fills city graph, sorts the data by weight, then calls krukals algorithem
-int main() {
+int main()
+{
     bool success = false;                    //bool value to know when to stop reading
     ifstream fin;                           //file variable
     string city, dest;
@@ -59,30 +60,14 @@ int main() {
 
     populate(graph, array);                         //populate graph with int values once we have paramteters and city mappings
 
-//    for (int i = 0; i < graphEdges ; i++)         //to see whats inside cityGraph
-//    {
-//        cout << "Number: " << i + 1 << endl;
-//        cout << graph -> connection[i].cityPairSource << endl;
-//        cout << graph -> connection[i].cityPairDest << endl;
-//        cout << graph -> connection[i].weight << endl;
-//        cout << "________" << endl;
-//    }
-
-//sort data by weight to prepare kruscals alg???
-//quick sort clibrary format - void qsort (void* base, size_t num, size_t size, int (*comparator)(const void*,const void*));
+//quick sort by weight, clibrary format - void qsort (void* base, size_t num, size_t size, int (*comparator)(const void*,const void*));
     qsort(graph -> connection, graph -> edges, sizeof(graph -> connection[0]), comparatorFunc);
-
-    for (int h = 0; h < graphEdges; h++)          //to see sorted edges based on weight
-    {
-        cout << "sorted " << graph -> connection[h].weight << endl;
-    }
 
     //call kruscals alg
     kruskalsAlg(graph, array);
 
     return 0;
 }
-
 
 //gets parameters of cityGraph (#verticies and edges) by reading through data file
 void getParameters()
@@ -130,10 +115,9 @@ void getParameters()
     } else {cout << "DID NOT OPEN FILE" << endl;}
 }
 
-
-
 //populate cityGraph with the city data
-void  populate(struct cityGraph * graph, string * array) {
+void  populate(struct cityGraph * graph, string * array)
+{
     bool success = false;                    //bool value to know when to stop reading
     ifstream fin;                           //file variable
     int i = 0;
@@ -168,37 +152,37 @@ void  populate(struct cityGraph * graph, string * array) {
         cout << "DID NOT OPEN FILE" << endl;
 }
 
-
-
 //main function to construct MST using Kruskal's algorithm
-void kruskalsAlg(struct cityGraph * graph, string * array) {
+void kruskalsAlg(struct cityGraph * graph, string * array)
+{
     struct edgeConnection result[graphVerticies];   //store the final result in an array of edge structs so that it can be read later
     int sortedIndex = 0;                            //index variable for sorted edges
     int resultIndex = 0;                            //index variable to parse throguh result[]
-
+    int src = 0;                                    //for finding next smallest edges
+    int dest = 0;
+    int srcRoot = 0;                                //for union find once we find an approved edge for min span tree
+    int destRoot = 0;
     struct subset *vSubset;                        //allocate memory for creating the subsets for each verticy
     vSubset = new struct subset[graphVerticies];
 
     for (int i = 0; i < graphVerticies; ++i)        //need to initialize subsets in numerical order
     {
         vSubset[i].parent = i;
-        vSubset[i].rank = 0;
     }
 
+    //actual subtree search and creation
     while (resultIndex < graphVerticies - 1)        //loop through all verticies from 0 to graphVerticies
     {
-        struct edgeConnection current = graph -> connection[sortedIndex];       //start at smallest edge with index i and incrememnt through sorted list
-        int src = find(vSubset, current.cityPairSource);            //get int value of verticy in order to do a compare if in same tree
-        int dest = find(vSubset, current.cityPairDest);
+        struct edgeConnection current = graph->connection[sortedIndex];       //start at smallest edge with index i and incrememnt through sorted list
+        src = find(vSubset, current.cityPairSource);                         //get int value of verticy in order to do a compare if in same tree
+        dest = find(vSubset, current.cityPairDest);
 
         if (src != dest)                                            //if adding x and y are not already part of the same tree, add into result array and increment index (if not dont do anythign)
         {
-            result[resultIndex++] = current;                        //add current edge to result edge list
-
             //UNION FIND!!!! Attach smaller rank under root of higher rank tree
             //3 cases to look for
-            int srcRoot = find(vSubset, src);
-            int destRoot = find(vSubset, dest);
+            srcRoot = find(vSubset, src);
+            destRoot = find(vSubset, dest);
 
             //1. if src rank is smaller, make dest root its parent
             if (vSubset[srcRoot].rank < vSubset[destRoot].rank)
@@ -214,6 +198,8 @@ void kruskalsAlg(struct cityGraph * graph, string * array) {
                 vSubset[destRoot].parent = srcRoot;
                 vSubset[srcRoot].rank++;
             }
+
+            result[resultIndex++] = current;                        //add current edge to result edge list
         }
 
         sortedIndex += 1;     //incrementt index
